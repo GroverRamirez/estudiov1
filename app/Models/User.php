@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'idRol'
     ];
 
     /**
@@ -44,5 +45,30 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function rol()
+    {
+        return $this->belongsTo(Rol::class, 'idRol');
+    }
+
+    public function clientes()
+    {
+        return $this->hasMany(Cliente::class, 'idUsuario');
+    }
+
+    public function servicios()
+    {
+        return $this->hasMany(Servicio::class, 'idUsuario');
+    }
+
+    public function trabajos()
+    {
+        return $this->hasMany(Trabajo::class, 'idUsuario');
+    }
+
+    public function asignaciones()
+    {
+        return $this->hasMany(AsignacionTrabajo::class, 'idUsuarioEncargado');
     }
 }
