@@ -13,13 +13,19 @@ class Servicio extends Model
     protected $primaryKey = 'idServicio';
 
     protected $fillable = [
-        'nombreServicio',
+        'nombre',
+        'descripcion',
         'precio',
+        'categoria',
+        'estado',
+        'duracion_estimada',
+        'imagen',
         'idUsuario'
     ];
 
     protected $casts = [
-        'precio' => 'decimal:2'
+        'precio' => 'decimal:2',
+        'duracion_estimada' => 'integer'
     ];
 
     public function usuario()
@@ -30,5 +36,11 @@ class Servicio extends Model
     public function trabajos()
     {
         return $this->hasMany(Trabajo::class, 'idServicio');
+    }
+
+    // Override the getRouteKeyName method to use idServicio for route model binding
+    public function getRouteKeyName()
+    {
+        return 'idServicio';
     }
 }

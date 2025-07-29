@@ -10,14 +10,36 @@ use Inertia\Response;
 
 class ServicioController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $servicios = Servicio::with('usuario')
-            ->orderBy('nombreServicio')
-            ->paginate(10);
+        $query = Servicio::with('usuario');
+
+        // Search
+        if ($request->filled('search')) {
+            $query->where('nombre', 'like', '%' . $request->search . '%')
+                  ->orWhere('descripcion', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter by category
+        if ($request->filled('categoria')) {
+            $query->where('categoria', $request->categoria);
+        }
+
+        // Filter by status
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        // Sort
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        $query->orderBy($sortBy, $sortDirection);
+
+        $servicios = $query->paginate(10)->withQueryString();
 
         return Inertia::render('Servicios/Index', [
-            'servicios' => $servicios
+            'servicios' => $servicios,
+            'filters' => $request->only(['search', 'categoria', 'estado', 'sort_by', 'sort_direction'])
         ]);
     }
 
@@ -26,24 +48,30 @@ class ServicioController extends Controller
         return Inertia::render('Servicios/Create');
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
         $request->validate([
-            'nombreServicio' => 'required|string|max:100',
+            'nombre' => 'required|string|max:100',
+            'descripcion' => 'required|string|max:500',
             'precio' => 'required|numeric|min:0',
+            'categoria' => 'required|string|max:50',
+            'estado' => 'required|in:activo,inactivo',
+            'duracion_estimada' => 'nullable|integer|min:0',
+            'imagen' => 'nullable|url|max:255',
         ]);
 
         $servicio = Servicio::create([
-            'nombreServicio' => $request->nombreServicio,
+            'nombre' => $request->nombre,
+            'descripcion' => $request->descripcion,
             'precio' => $request->precio,
+            'categoria' => $request->categoria,
+            'estado' => $request->estado,
+            'duracion_estimada' => $request->duracion_estimada,
+            'imagen' => $request->imagen,
             'idUsuario' => auth()->id(),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Servicio creado exitosamente',
-            'servicio' => $servicio->load('usuario')
-        ]);
+        return redirect()->route('servicios.index');
     }
 
     public function show(Servicio $servicio): Response
@@ -62,32 +90,35 @@ class ServicioController extends Controller
         ]);
     }
 
-    public function update(Request $request, Servicio $servicio): JsonResponse
+    public function update(Request $request, Servicio $servicio)
     {
         $request->validate([
-            'nombreServicio' => 'required|string|max:100',
+            'nombre' => 'required|string|max:100',
+            'descripcion' => 'required|string|max:500',
             'precio' => 'required|numeric|min:0',
+            'categoria' => 'required|string|max:50',
+            'estado' => 'required|in:activo,inactivo',
+            'duracion_estimada' => 'nullable|integer|min:0',
+            'imagen' => 'nullable|url|max:255',
         ]);
 
         $servicio->update([
-            'nombreServicio' => $request->nombreServicio,
+            'nombre' => $request->nombre,
+            'descripcion' => $request->descripcion,
             'precio' => $request->precio,
+            'categoria' => $request->categoria,
+            'estado' => $request->estado,
+            'duracion_estimada' => $request->duracion_estimada,
+            'imagen' => $request->imagen,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Servicio actualizado exitosamente',
-            'servicio' => $servicio->load('usuario')
-        ]);
+        return redirect()->route('servicios.index');
     }
 
-    public function destroy(Servicio $servicio): JsonResponse
+    public function destroy(Servicio $servicio)
     {
         $servicio->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Servicio eliminado exitosamente'
-        ]);
+        return redirect()->route('servicios.index');
     }
 }

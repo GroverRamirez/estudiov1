@@ -77,3 +77,46 @@ export interface ClientesPageProps {
         sort_direction?: 'asc' | 'desc';
     };
 }
+
+// Servicio types
+export interface Servicio {
+    idServicio: number;
+    nombre: string;
+    descripcion: string;
+    precio: number;
+    categoria: string;
+    estado: 'activo' | 'inactivo';
+    duracion_estimada?: number; // en minutos
+    imagen?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ServicioFormData {
+    nombre: string;
+    descripcion: string;
+    precio: number;
+    categoria: string;
+    estado: 'activo' | 'inactivo';
+    duracion_estimada?: number;
+    imagen?: string;
+}
+
+export interface ServiciosPageProps {
+    servicios: {
+        data: Servicio[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
+    filters: {
+        search?: string;
+        categoria?: string;
+        estado?: string;
+        sort_by?: string;
+        sort_direction?: 'asc' | 'desc';
+    };
+}
