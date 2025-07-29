@@ -11,12 +11,21 @@ class Cliente extends Model
 
     protected $table = 'clientes';
     protected $primaryKey = 'idCliente';
+    
+    // Override the getRouteKeyName method to use idCliente for route model binding
+    public function getRouteKeyName()
+    {
+        return 'idCliente';
+    }
 
     protected $fillable = [
         'nombre',
-        'apellido',
-        'telefono',
         'email',
+        'telefono',
+        'direccion',
+        'estado',
+        'observaciones',
+        'fecha_registro',
         'idUsuario'
     ];
 
@@ -37,6 +46,6 @@ class Cliente extends Model
 
     public function getNombreCompletoAttribute()
     {
-        return $this->nombre . ' ' . $this->apellido;
+        return $this->nombre;
     }
 }

@@ -36,3 +36,44 @@ export interface User {
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
+
+// Cliente types
+export interface Cliente {
+    idCliente: number;
+    nombre: string;
+    email: string;
+    telefono: string;
+    direccion: string;
+    fecha_registro: string;
+    estado: 'activo' | 'inactivo';
+    observaciones?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ClienteFormData {
+    nombre: string;
+    email: string;
+    telefono: string;
+    direccion: string;
+    estado: 'activo' | 'inactivo';
+    observaciones?: string;
+}
+
+export interface ClientesPageProps {
+    clientes: {
+        data: Cliente[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
+    filters: {
+        search?: string;
+        estado?: string;
+        sort_by?: string;
+        sort_direction?: 'asc' | 'desc';
+    };
+}

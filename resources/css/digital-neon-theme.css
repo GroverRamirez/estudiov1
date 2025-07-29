@@ -1,0 +1,208 @@
+/* ===== TEMA DIGITAL NEON - FOTO ESTUDIO "EU" ===== */
+
+:root {
+  /* Colores principales del tema Digital Neon */
+  --color-primary: 99 102 241; /* #6366f1 - Indigo vibrante */
+  --color-primary-foreground: 248 250 252; /* #f8fafc - Blanco puro */
+  
+  --color-secondary: 236 72 153; /* #ec4899 - Rosa neón */
+  --color-secondary-foreground: 248 250 252; /* #f8fafc - Blanco puro */
+  
+  --color-accent: 6 182 212; /* #06b6d4 - Cyan eléctrico */
+  --color-accent-foreground: 248 250 252; /* #f8fafc - Blanco puro */
+  
+  /* Colores de fondo */
+  --color-background: 15 23 42; /* #0f172a - Azul oscuro */
+  --color-foreground: 248 250 252; /* #f8fafc - Blanco puro */
+  
+  /* Colores de tarjetas */
+  --color-card: 30 41 59; /* #1e293b - Slate oscuro */
+  --color-card-foreground: 248 250 252; /* #f8fafc - Blanco puro */
+  
+  /* Colores de bordes */
+  --color-border: 51 65 85; /* #334155 - Slate medio */
+  --color-input: 51 65 85; /* #334155 - Slate medio */
+  
+  /* Colores de estados */
+  --color-success: 34 197 94; /* #22c55e - Verde brillante */
+  --color-warning: 245 158 11; /* #f59e0b - Ámbar */
+  --color-error: 239 68 68; /* #ef4444 - Rojo vibrante */
+  
+  /* Colores de texto */
+  --color-muted: 148 163 184; /* #94a3b8 - Slate claro */
+  --color-muted-foreground: 148 163 184; /* #94a3b8 - Slate claro */
+  
+  /* Colores de hover */
+  --color-primary-hover: 79 70 229; /* #4f46e5 - Indigo más oscuro */
+  --color-secondary-hover: 219 39 119; /* #db2777 - Rosa más oscuro */
+  --color-accent-hover: 8 145 178; /* #0891b2 - Cyan más oscuro */
+  
+  /* Gradientes especiales */
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+  --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%);
+  --gradient-accent: linear-gradient(135deg, #ec4899 0%, #f59e0b 100%);
+  
+  /* Sombras con efecto neón */
+  --shadow-neon-primary: 0 0 20px rgba(99, 102, 241, 0.3);
+  --shadow-neon-secondary: 0 0 20px rgba(236, 72, 153, 0.3);
+  --shadow-neon-accent: 0 0 20px rgba(6, 182, 212, 0.3);
+}
+
+/* ===== CLASES UTILITARIAS PERSONALIZADAS ===== */
+
+/* Efectos de neón */
+.neon-glow-primary {
+  box-shadow: var(--shadow-neon-primary);
+}
+
+.neon-glow-secondary {
+  box-shadow: var(--shadow-neon-secondary);
+}
+
+.neon-glow-accent {
+  box-shadow: var(--shadow-neon-accent);
+}
+
+/* Botones con efecto neón */
+.btn-neon-primary {
+  background: var(--gradient-primary);
+  color: var(--color-primary-foreground);
+  border: 1px solid rgb(var(--color-primary));
+  box-shadow: var(--shadow-neon-primary);
+  transition: all 0.3s ease;
+}
+
+.btn-neon-primary:hover {
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+  transform: translateY(-2px);
+}
+
+.btn-neon-secondary {
+  background: var(--gradient-secondary);
+  color: var(--color-secondary-foreground);
+  border: 1px solid rgb(var(--color-secondary));
+  box-shadow: var(--shadow-neon-secondary);
+  transition: all 0.3s ease;
+}
+
+.btn-neon-secondary:hover {
+  box-shadow: 0 0 30px rgba(236, 72, 153, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Tarjetas con efecto neón */
+.card-neon {
+  background: var(--color-card);
+  border: 1px solid rgb(var(--color-border));
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card-neon:hover {
+  box-shadow: var(--shadow-neon-primary);
+  transform: translateY(-4px);
+}
+
+/* Sidebar con gradiente */
+.sidebar-neon {
+  background: linear-gradient(180deg, var(--color-background) 0%, var(--color-card) 100%);
+  border-right: 1px solid rgb(var(--color-border));
+}
+
+/* Header con efecto neón */
+.header-neon {
+  background: var(--color-card);
+  border-bottom: 1px solid rgb(var(--color-border));
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Inputs con efecto neón */
+.input-neon {
+  background: var(--color-card);
+  border: 1px solid rgb(var(--color-input));
+  color: var(--color-foreground);
+  transition: all 0.3s ease;
+}
+
+.input-neon:focus {
+  border-color: rgb(var(--color-primary));
+  box-shadow: var(--shadow-neon-primary);
+  outline: none;
+}
+
+/* Badges con efecto neón */
+.badge-neon-success {
+  background: rgb(var(--color-success));
+  color: var(--color-foreground);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+}
+
+.badge-neon-warning {
+  background: rgb(var(--color-warning));
+  color: var(--color-foreground);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.badge-neon-error {
+  background: rgb(var(--color-error));
+  color: var(--color-foreground);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+/* Animaciones de carga con neón */
+.loading-neon {
+  border: 2px solid rgb(var(--color-primary));
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  box-shadow: var(--shadow-neon-primary);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Efecto de pulso neón */
+.pulse-neon {
+  animation: pulse-neon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-neon {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: var(--shadow-neon-primary);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+  }
+}
+
+/* ===== RESPONSIVE Y ACCESIBILIDAD ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-neon-primary:hover,
+  .btn-neon-secondary:hover,
+  .card-neon:hover {
+    transform: none;
+  }
+  
+  .pulse-neon {
+    animation: none;
+  }
+}
+
+/* ===== DARK MODE (ya está configurado por defecto) ===== */
+
+/* El tema ya es oscuro por defecto, pero podemos agregar variaciones */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-background: 248 250 252; /* #f8fafc - Blanco */
+    --color-foreground: 15 23 42; /* #0f172a - Azul oscuro */
+    --color-card: 255 255 255; /* #ffffff - Blanco puro */
+    --color-card-foreground: 15 23 42; /* #0f172a - Azul oscuro */
+    --color-border: 226 232 240; /* #e2e8f0 - Gris claro */
+    --color-input: 226 232 240; /* #e2e8f0 - Gris claro */
+  }
+} 

@@ -10,14 +10,35 @@ use Inertia\Response;
 
 class ClienteController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $clientes = Cliente::with('usuario')
-            ->orderBy('nombre')
-            ->paginate(10);
+        $query = Cliente::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('telefono', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by estado
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->get('estado'));
+        }
+
+        // Sort
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        $query->orderBy($sortBy, $sortDirection);
+
+        $clientes = $query->paginate(10)->withQueryString();
 
         return Inertia::render('Clientes/Index', [
-            'clientes' => $clientes
+            'clientes' => $clientes,
+            'filters' => $request->only(['search', 'estado', 'sort_by', 'sort_direction'])
         ]);
     }
 
@@ -26,36 +47,48 @@ class ClienteController extends Controller
         return Inertia::render('Clientes/Create');
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
         $request->validate([
             'nombre' => 'required|string|max:100',
-            'apellido' => 'required|string|max:100',
-            'telefono' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:150',
+            'email' => 'required|email|max:150|unique:clientes,email,idCliente',
+            'telefono' => 'required|string|max:20',
+            'direccion' => 'required|string|max:255',
+            'estado' => 'required|in:activo,inactivo',
+            'observaciones' => 'nullable|string|max:500',
         ]);
 
         $cliente = Cliente::create([
             'nombre' => $request->nombre,
-            'apellido' => $request->apellido,
-            'telefono' => $request->telefono,
             'email' => $request->email,
+            'telefono' => $request->telefono,
+            'direccion' => $request->direccion,
+            'estado' => $request->estado,
+            'observaciones' => $request->observaciones,
+            'fecha_registro' => now(),
             'idUsuario' => auth()->id(),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Cliente creado exitosamente',
-            'cliente' => $cliente->load('usuario')
-        ]);
+        return redirect()->route('clientes.index')
+            ->with('success', 'Cliente creado exitosamente');
     }
 
     public function show(Cliente $cliente): Response
     {
         $cliente->load(['usuario', 'trabajos.servicio', 'trabajos.estado', 'pagos.estado']);
 
+        // Calculate statistics
+        $estadisticas = [
+            'total_trabajos' => $cliente->trabajos->count(),
+            'trabajos_completados' => $cliente->trabajos->where('estado.nombre', 'Completado')->count(),
+            'trabajos_pendientes' => $cliente->trabajos->whereIn('estado.nombre', ['Pendiente', 'En Proceso'])->count(),
+            'total_pagado' => $cliente->pagos->where('estado.nombre', 'Completado')->sum('monto'),
+            'saldo_pendiente' => $cliente->trabajos->sum('precio_total') - $cliente->pagos->where('estado.nombre', 'Completado')->sum('monto'),
+        ];
+
         return Inertia::render('Clientes/Show', [
-            'cliente' => $cliente
+            'cliente' => $cliente,
+            'estadisticas' => $estadisticas
         ]);
     }
 
@@ -66,36 +99,35 @@ class ClienteController extends Controller
         ]);
     }
 
-    public function update(Request $request, Cliente $cliente): JsonResponse
+    public function update(Request $request, Cliente $cliente)
     {
         $request->validate([
             'nombre' => 'required|string|max:100',
-            'apellido' => 'required|string|max:100',
-            'telefono' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:150',
+            'email' => 'required|email|max:150|unique:clientes,email,' . $cliente->idCliente . ',idCliente',
+            'telefono' => 'required|string|max:20',
+            'direccion' => 'required|string|max:255',
+            'estado' => 'required|in:activo,inactivo',
+            'observaciones' => 'nullable|string|max:500',
         ]);
 
         $cliente->update([
             'nombre' => $request->nombre,
-            'apellido' => $request->apellido,
-            'telefono' => $request->telefono,
             'email' => $request->email,
+            'telefono' => $request->telefono,
+            'direccion' => $request->direccion,
+            'estado' => $request->estado,
+            'observaciones' => $request->observaciones,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Cliente actualizado exitosamente',
-            'cliente' => $cliente->load('usuario')
-        ]);
+        return redirect()->route('clientes.index')
+            ->with('success', 'Cliente actualizado exitosamente');
     }
 
-    public function destroy(Cliente $cliente): JsonResponse
+    public function destroy(Cliente $cliente)
     {
         $cliente->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Cliente eliminado exitosamente'
-        ]);
+        return redirect()->route('clientes.index')
+            ->with('success', 'Cliente eliminado exitosamente');
     }
 }
