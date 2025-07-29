@@ -143,7 +143,7 @@ export interface Trabajo {
     cliente?: Cliente;
     servicio?: Servicio;
     usuario?: User;
-    estado_trabajo?: EstadoTrabajo;
+
 }
 
 export interface TrabajoFormData {
@@ -160,14 +160,7 @@ export interface TrabajoFormData {
     idServicio: number;
 }
 
-export interface EstadoTrabajo {
-    idEstado: number;
-    nombre: string;
-    descripcion: string;
-    color: string;
-    created_at: string;
-    updated_at: string;
-}
+
 
 export interface TrabajosPageProps {
     trabajos: {
@@ -190,5 +183,84 @@ export interface TrabajosPageProps {
     };
     clientes?: Cliente[];
     servicios?: Servicio[];
-    estados?: EstadoTrabajo[];
+    estados?: Record<string, string>;
+}
+
+// Pago types
+export interface Pago {
+    idPago: number;
+    monto: number;
+    fecha_pago: string;
+    metodo_pago: 'efectivo' | 'tarjeta' | 'transferencia' | 'deposito' | 'otro';
+    referencia?: string;
+    estado: 'completado' | 'pendiente' | 'cancelado' | 'reembolsado';
+    tipo_pago: 'adelanto' | 'pago_parcial' | 'pago_completo' | 'reembolso';
+    observaciones?: string;
+    idTrabajo: number;
+    idUsuario: number;
+    created_at: string;
+    updated_at: string;
+    // Relaciones
+    trabajo?: Trabajo;
+    usuario?: User;
+}
+
+export interface PagoFormData {
+    monto: number;
+    fecha_pago: string;
+    metodo_pago: 'efectivo' | 'tarjeta' | 'transferencia' | 'deposito' | 'otro';
+    referencia?: string;
+    estado: 'completado' | 'pendiente' | 'cancelado' | 'reembolsado';
+    tipo_pago: 'adelanto' | 'pago_parcial' | 'pago_completo' | 'reembolso';
+    observaciones?: string;
+    idTrabajo: number;
+}
+
+export interface MetodoPago {
+    id: string;
+    nombre: string;
+    descripcion: string;
+    icono: string;
+    color: string;
+}
+
+
+
+export interface TipoPago {
+    id: string;
+    nombre: string;
+    descripcion: string;
+    color: string;
+}
+
+export interface PagosPageProps {
+    pagos: {
+        data: Pago[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
+    filters: {
+        search?: string;
+        estado?: string;
+        metodo_pago?: string;
+        tipo_pago?: string;
+        fecha_desde?: string;
+        fecha_hasta?: string;
+        trabajo_id?: number;
+        sort_by?: string;
+        sort_direction?: 'asc' | 'desc';
+    };
+    trabajos?: Trabajo[];
+    estadisticas?: {
+        total_pagado: number;
+        total_pendiente: number;
+        total_cancelado: number;
+        total_reembolsado: number;
+        pagos_hoy: number;
+        pagos_mes: number;
+    };
 }

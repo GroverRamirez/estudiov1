@@ -49,10 +49,7 @@ class Trabajo extends Model
         return $this->belongsTo(User::class, 'idUsuario');
     }
 
-    public function estado_trabajo()
-    {
-        return $this->belongsTo(EstadoTrabajo::class, 'estado', 'nombre');
-    }
+
 
     // Override the getRouteKeyName method to use idTrabajo for route model binding
     public function getRouteKeyName()

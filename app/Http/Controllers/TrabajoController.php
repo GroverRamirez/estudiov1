@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Trabajo;
 use App\Models\Cliente;
 use App\Models\Servicio;
-use App\Models\EstadoTrabajo;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,35 +13,39 @@ class TrabajoController extends Controller
 {
     public function index(Request $request): Response
     {
-        $query = Trabajo::with(['cliente', 'servicio', 'usuario', 'estado_trabajo']);
+        $query = Trabajo::with(['cliente', 'servicio']);
 
-        // Search
+        // Filtros
         if ($request->filled('search')) {
-            $query->where('titulo', 'like', '%' . $request->search . '%')
-                  ->orWhere('descripcion', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('titulo', 'like', '%' . $request->search . '%')
+                  ->orWhere('descripcion', 'like', '%' . $request->search . '%')
+                  ->orWhereHas('cliente', function ($cq) use ($request) {
+                      $cq->where('nombre', 'like', '%' . $request->search . '%');
+                  })
+                  ->orWhereHas('servicio', function ($sq) use ($request) {
+                      $sq->where('nombre', 'like', '%' . $request->search . '%');
+                  });
+            });
         }
 
-        // Filter by status
         if ($request->filled('estado')) {
             $query->where('estado', $request->estado);
         }
 
-        // Filter by priority
         if ($request->filled('prioridad')) {
             $query->where('prioridad', $request->prioridad);
         }
 
-        // Filter by client
         if ($request->filled('cliente_id')) {
             $query->where('idCliente', $request->cliente_id);
         }
 
-        // Filter by service
         if ($request->filled('servicio_id')) {
             $query->where('idServicio', $request->servicio_id);
         }
 
-        // Sort
+        // Ordenamiento
         $sortBy = $request->get('sort_by', 'created_at');
         $sortDirection = $request->get('sort_direction', 'desc');
         $query->orderBy($sortBy, $sortDirection);
@@ -53,7 +55,12 @@ class TrabajoController extends Controller
         // Get data for filters
         $clientes = Cliente::orderBy('nombre')->get();
         $servicios = Servicio::orderBy('nombre')->get();
-        $estados = EstadoTrabajo::orderBy('nombre')->get();
+        $estados = [
+            'pendiente' => 'Pendiente',
+            'en proceso' => 'En Proceso',
+            'completado' => 'Completado',
+            'cancelado' => 'Cancelado'
+        ];
 
         return Inertia::render('Trabajos/Index', [
             'trabajos' => $trabajos,
@@ -68,7 +75,12 @@ class TrabajoController extends Controller
     {
         $clientes = Cliente::orderBy('nombre')->get();
         $servicios = Servicio::orderBy('nombre')->get();
-        $estados = EstadoTrabajo::orderBy('nombre')->get();
+        $estados = [
+            'pendiente' => 'Pendiente',
+            'en proceso' => 'En Proceso',
+            'completado' => 'Completado',
+            'cancelado' => 'Cancelado'
+        ];
 
         return Inertia::render('Trabajos/Create', [
             'clientes' => $clientes,
@@ -116,11 +128,7 @@ class TrabajoController extends Controller
         $trabajo->load([
             'cliente', 
             'servicio', 
-            'usuario', 
-            'estado', 
-            'detalle',
-            'asignaciones.usuarioEncargado',
-            'pagos.estado'
+            'usuario'
         ]);
 
         return Inertia::render('Trabajos/Show', [
@@ -131,11 +139,16 @@ class TrabajoController extends Controller
     public function edit(Trabajo $trabajo): Response
     {
         $clientes = Cliente::orderBy('nombre')->get();
-        $servicios = Servicio::orderBy('nombreServicio')->get();
-        $estados = EstadoTrabajo::orderBy('nombre')->get();
+        $servicios = Servicio::orderBy('nombre')->get();
+        $estados = [
+            'pendiente' => 'Pendiente',
+            'en proceso' => 'En Proceso',
+            'completado' => 'Completado',
+            'cancelado' => 'Cancelado'
+        ];
 
         return Inertia::render('Trabajos/Edit', [
-            'trabajo' => $trabajo->load(['cliente', 'servicio', 'estado']),
+            'trabajo' => $trabajo->load(['cliente', 'servicio']),
             'clientes' => $clientes,
             'servicios' => $servicios,
             'estados' => $estados

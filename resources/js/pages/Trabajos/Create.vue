@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { type BreadcrumbItem, type TrabajoFormData, type Cliente, type Servicio, type EstadoTrabajo } from '@/types';
+import { type BreadcrumbItem, type TrabajoFormData, type Cliente, type Servicio } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { 
     ArrowLeft, 
@@ -21,7 +21,7 @@ import { ref, computed } from 'vue';
 interface Props {
     clientes: Cliente[];
     servicios: Servicio[];
-    estados: EstadoTrabajo[];
+    estados: Record<string, string>;
 }
 
 const props = defineProps<Props>();
@@ -196,8 +196,8 @@ const formatCurrency = (amount: number) => {
                                             ]"
                                             required
                                         >
-                                            <option v-for="estado in estados" :key="estado.idEstado" :value="estado.nombre">
-                                                {{ estado.nombre }}
+                                            <option v-for="(nombre, key) in estados" :key="key" :value="key">
+                                                {{ nombre }}
                                             </option>
                                         </select>
                                     </div>
