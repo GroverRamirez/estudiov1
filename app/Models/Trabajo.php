@@ -13,17 +13,25 @@ class Trabajo extends Model
     protected $primaryKey = 'idTrabajo';
 
     protected $fillable = [
+        'titulo',
+        'descripcion',
+        'fecha_inicio',
+        'fecha_entrega',
+        'estado',
+        'prioridad',
+        'precio_total',
+        'adelanto',
+        'observaciones',
         'idCliente',
         'idServicio',
-        'idUsuario',
-        'fechaRegistro',
-        'fechaEntrega',
-        'idEstado'
+        'idUsuario'
     ];
 
     protected $casts = [
-        'fechaRegistro' => 'date',
-        'fechaEntrega' => 'date'
+        'fecha_inicio' => 'date',
+        'fecha_entrega' => 'date',
+        'precio_total' => 'decimal:2',
+        'adelanto' => 'decimal:2'
     ];
 
     public function cliente()
@@ -41,9 +49,15 @@ class Trabajo extends Model
         return $this->belongsTo(User::class, 'idUsuario');
     }
 
-    public function estado()
+    public function estado_trabajo()
     {
-        return $this->belongsTo(EstadoTrabajo::class, 'idEstado');
+        return $this->belongsTo(EstadoTrabajo::class, 'estado', 'nombre');
+    }
+
+    // Override the getRouteKeyName method to use idTrabajo for route model binding
+    public function getRouteKeyName()
+    {
+        return 'idTrabajo';
     }
 
     public function detalle()

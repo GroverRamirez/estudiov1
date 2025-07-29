@@ -13,21 +13,61 @@ use Inertia\Response;
 
 class TrabajoController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $trabajos = Trabajo::with(['cliente', 'servicio', 'usuario', 'estado'])
-            ->orderBy('fechaRegistro', 'desc')
-            ->paginate(10);
+        $query = Trabajo::with(['cliente', 'servicio', 'usuario', 'estado_trabajo']);
+
+        // Search
+        if ($request->filled('search')) {
+            $query->where('titulo', 'like', '%' . $request->search . '%')
+                  ->orWhere('descripcion', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter by status
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        // Filter by priority
+        if ($request->filled('prioridad')) {
+            $query->where('prioridad', $request->prioridad);
+        }
+
+        // Filter by client
+        if ($request->filled('cliente_id')) {
+            $query->where('idCliente', $request->cliente_id);
+        }
+
+        // Filter by service
+        if ($request->filled('servicio_id')) {
+            $query->where('idServicio', $request->servicio_id);
+        }
+
+        // Sort
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        $query->orderBy($sortBy, $sortDirection);
+
+        $trabajos = $query->paginate(10)->withQueryString();
+
+        // Get data for filters
+        $clientes = Cliente::orderBy('nombre')->get();
+        $servicios = Servicio::orderBy('nombre')->get();
+        $estados = EstadoTrabajo::orderBy('nombre')->get();
 
         return Inertia::render('Trabajos/Index', [
-            'trabajos' => $trabajos
+            'trabajos' => $trabajos,
+            'filters' => $request->only(['search', 'estado', 'prioridad', 'cliente_id', 'servicio_id', 'sort_by', 'sort_direction']),
+            'clientes' => $clientes,
+            'servicios' => $servicios,
+            'estados' => $estados
         ]);
     }
 
     public function create(): Response
     {
         $clientes = Cliente::orderBy('nombre')->get();
-        $servicios = Servicio::orderBy('nombreServicio')->get();
+        $servicios = Servicio::orderBy('nombre')->get();
         $estados = EstadoTrabajo::orderBy('nombre')->get();
 
         return Inertia::render('Trabajos/Create', [
@@ -37,30 +77,38 @@ class TrabajoController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
         $request->validate([
+            'titulo' => 'required|string|max:200',
+            'descripcion' => 'required|string|max:1000',
+            'fecha_inicio' => 'required|date',
+            'fecha_entrega' => 'required|date|after:fecha_inicio',
+            'estado' => 'required|string|max:50',
+            'prioridad' => 'required|in:baja,media,alta,urgente',
+            'precio_total' => 'required|numeric|min:0',
+            'adelanto' => 'nullable|numeric|min:0',
+            'observaciones' => 'nullable|string|max:500',
             'idCliente' => 'required|exists:clientes,idCliente',
             'idServicio' => 'required|exists:servicios,idServicio',
-            'fechaRegistro' => 'required|date',
-            'fechaEntrega' => 'required|date|after:fechaRegistro',
-            'idEstado' => 'required|exists:estados_trabajo,id',
         ]);
 
         $trabajo = Trabajo::create([
+            'titulo' => $request->titulo,
+            'descripcion' => $request->descripcion,
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_entrega' => $request->fecha_entrega,
+            'estado' => $request->estado,
+            'prioridad' => $request->prioridad,
+            'precio_total' => $request->precio_total,
+            'adelanto' => $request->adelanto ?? 0,
+            'observaciones' => $request->observaciones,
             'idCliente' => $request->idCliente,
             'idServicio' => $request->idServicio,
             'idUsuario' => auth()->id(),
-            'fechaRegistro' => $request->fechaRegistro,
-            'fechaEntrega' => $request->fechaEntrega,
-            'idEstado' => $request->idEstado,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Trabajo creado exitosamente',
-            'trabajo' => $trabajo->load(['cliente', 'servicio', 'usuario', 'estado'])
-        ]);
+        return redirect()->route('trabajos.index');
     }
 
     public function show(Trabajo $trabajo): Response
@@ -94,38 +142,43 @@ class TrabajoController extends Controller
         ]);
     }
 
-    public function update(Request $request, Trabajo $trabajo): JsonResponse
+    public function update(Request $request, Trabajo $trabajo)
     {
         $request->validate([
+            'titulo' => 'required|string|max:200',
+            'descripcion' => 'required|string|max:1000',
+            'fecha_inicio' => 'required|date',
+            'fecha_entrega' => 'required|date|after:fecha_inicio',
+            'estado' => 'required|string|max:50',
+            'prioridad' => 'required|in:baja,media,alta,urgente',
+            'precio_total' => 'required|numeric|min:0',
+            'adelanto' => 'nullable|numeric|min:0',
+            'observaciones' => 'nullable|string|max:500',
             'idCliente' => 'required|exists:clientes,idCliente',
             'idServicio' => 'required|exists:servicios,idServicio',
-            'fechaRegistro' => 'required|date',
-            'fechaEntrega' => 'required|date|after:fechaRegistro',
-            'idEstado' => 'required|exists:estados_trabajo,id',
         ]);
 
         $trabajo->update([
+            'titulo' => $request->titulo,
+            'descripcion' => $request->descripcion,
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_entrega' => $request->fecha_entrega,
+            'estado' => $request->estado,
+            'prioridad' => $request->prioridad,
+            'precio_total' => $request->precio_total,
+            'adelanto' => $request->adelanto ?? 0,
+            'observaciones' => $request->observaciones,
             'idCliente' => $request->idCliente,
             'idServicio' => $request->idServicio,
-            'fechaRegistro' => $request->fechaRegistro,
-            'fechaEntrega' => $request->fechaEntrega,
-            'idEstado' => $request->idEstado,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Trabajo actualizado exitosamente',
-            'trabajo' => $trabajo->load(['cliente', 'servicio', 'usuario', 'estado'])
-        ]);
+        return redirect()->route('trabajos.index');
     }
 
-    public function destroy(Trabajo $trabajo): JsonResponse
+    public function destroy(Trabajo $trabajo)
     {
         $trabajo->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Trabajo eliminado exitosamente'
-        ]);
+        return redirect()->route('trabajos.index');
     }
 }

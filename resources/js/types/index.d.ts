@@ -120,3 +120,75 @@ export interface ServiciosPageProps {
         sort_direction?: 'asc' | 'desc';
     };
 }
+
+// Trabajo types
+export interface Trabajo {
+    idTrabajo: number;
+    titulo: string;
+    descripcion: string;
+    fecha_inicio: string;
+    fecha_entrega: string;
+    estado: string;
+    prioridad: 'baja' | 'media' | 'alta' | 'urgente';
+    precio_total: number;
+    adelanto: number;
+    saldo_pendiente: number;
+    observaciones?: string;
+    idCliente: number;
+    idServicio: number;
+    idUsuario: number;
+    created_at: string;
+    updated_at: string;
+    // Relaciones
+    cliente?: Cliente;
+    servicio?: Servicio;
+    usuario?: User;
+    estado_trabajo?: EstadoTrabajo;
+}
+
+export interface TrabajoFormData {
+    titulo: string;
+    descripcion: string;
+    fecha_inicio: string;
+    fecha_entrega: string;
+    estado: string;
+    prioridad: 'baja' | 'media' | 'alta' | 'urgente';
+    precio_total: number;
+    adelanto: number;
+    observaciones?: string;
+    idCliente: number;
+    idServicio: number;
+}
+
+export interface EstadoTrabajo {
+    idEstado: number;
+    nombre: string;
+    descripcion: string;
+    color: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface TrabajosPageProps {
+    trabajos: {
+        data: Trabajo[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
+    filters: {
+        search?: string;
+        estado?: string;
+        prioridad?: string;
+        cliente_id?: number;
+        servicio_id?: number;
+        sort_by?: string;
+        sort_direction?: 'asc' | 'desc';
+    };
+    clientes?: Cliente[];
+    servicios?: Servicio[];
+    estados?: EstadoTrabajo[];
+}
